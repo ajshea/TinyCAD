@@ -138,7 +138,7 @@ BEGIN_MESSAGE_MAP(CTinyCadView, CFolderView)
 
 	ON_WM_SYSKEYDOWN()
 	ON_WM_SYSKEYUP()
-	
+
 	ON_WM_KEYDOWN()
 
 	ON_WM_CLOSE()
@@ -175,7 +175,7 @@ BEGIN_MESSAGE_MAP(CTinyCadView, CFolderView)
 	// The Keyboard options
 	ON_COMMAND( IDM_VIEWZOOMIN, OnViewZoomIn )
 	ON_COMMAND( IDM_VIEWZOOMOUT, OnViewZoomOut )
-	
+
 	// The Toolbar Menu
 	ON_COMMAND( IDM_VIEWCENTRE, OnViewCentre )
 	ON_COMMAND( IDM_TOOLBUSNAME, OnSelectBusName )
@@ -749,15 +749,15 @@ void CTinyCadView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	// they will correctly respond only when CTinyCadView has the keyboard focus.
 
 	// Shift-key not pressed (=high-order bit not set)
-	// Ctrl-key not pressed 
-	// Alt-key not pressed 
+	// Ctrl-key not pressed
+	// Alt-key not pressed
 	// 'Menu'-key not pressed
-	// 'Windows'-keys not pressed 
+	// 'Windows'-keys not pressed
 	if (::GetKeyState(VK_SHIFT) >= 0 &&
 		::GetKeyState(VK_CONTROL) >= 0 &&
-		::GetKeyState(VK_MENU) >= 0 && 
-		::GetKeyState(VK_APPS) >= 0 && 
-		::GetKeyState(VK_LWIN) >= 0 && 
+		::GetKeyState(VK_MENU) >= 0 &&
+		::GetKeyState(VK_APPS) >= 0 &&
+		::GetKeyState(VK_LWIN) >= 0 &&
 		::GetKeyState(VK_RWIN) >= 0)
 	{
 		switch (nChar)
@@ -1118,10 +1118,10 @@ void CTinyCadView::OnUpdateToolsquare(CCmdUI* pCmdUI)
 	}
 }
 
-void CTinyCadView::OnUpdateNoteTextText(CCmdUI* pCmdUI) 
+void CTinyCadView::OnUpdateNoteTextText(CCmdUI* pCmdUI)
 {
 	CDrawingObject *q = GetCurrentDocument()->GetEdit();
-	if (q)	
+	if (q)
 	{
 		pCmdUI->SetCheck(static_cast<int>(q->getMenuID() == pCmdUI->m_nID));
 	}
@@ -1313,7 +1313,7 @@ void CTinyCadView::OnToggleGridSize()
 void CTinyCadView::OnUpdateGridSize(CCmdUI* pCmdUI)
 {
 	double grid = GetCurrentDocument()->m_snap.GetAccurateGrid();
-	int units = GetCurrentDocument()->GetOptions()->GetUnits(); 
+	int units = GetCurrentDocument()->GetOptions()->GetUnits();
 	static_cast<CMainFrame*> (AfxGetMainWnd())->setGridSize(grid, units);
 	pCmdUI->Enable(FALSE);
 }
@@ -1361,7 +1361,7 @@ void CTinyCadView::OnUpdateRepeatpindown(CCmdUI* pCmdUI)
 
 void CTinyCadView::OnUpdateEditpaste(CCmdUI* pCmdUI)
 {
-	BOOL r = IsClipboardAvailable() 
+	BOOL r = IsClipboardAvailable()
 		|| ::IsClipboardFormatAvailable( CF_ENHMETAFILE )
 		|| ::IsClipboardFormatAvailable( CF_BITMAP )
 		|| ::IsClipboardFormatAvailable( CF_TEXT );
@@ -1393,8 +1393,8 @@ void CTinyCadView::OnUpdateEditRotateLRF(CCmdUI* pCmdUI)
 	ObjType type = GetCurrentDocument()->GetEdit()->GetType();
 	BOOL r = ( type == xEditItem && GetCurrentDocument()->IsSelected())
 			|| type == xMethod || type == xMethodEx || type == xMethodEx2 || type == xMethodEx3
-			|| type == xAnnotation 
-			|| type == xLabel || type == xLabelEx || type == xLabelEx2 
+			|| type == xAnnotation
+			|| type == xLabel || type == xLabelEx || type == xLabelEx2
 			|| type == xPower
 			|| type == xText || type == xTextEx || type == xTextEx2
 			|| type == xBusName || type == xBusNameEx
@@ -1447,7 +1447,7 @@ void CTinyCadView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* p
 	{	//Deactivate this view
 		CDrawingObject* obj;
 		obj = GetCurrentDocument()->GetEdit();
-		//ATLTRACE2("CTinyCadView::OnActivateView() - de-activating this View.  obj is %s, obj->GetType() = %d\n", 
+		//ATLTRACE2("CTinyCadView::OnActivateView() - de-activating this View.  obj is %s, obj->GetType() = %d\n",
 		//	(obj ? "valid":"NULL"),
 		//	(obj ? obj->GetType() : -1));
 
@@ -1572,45 +1572,60 @@ void CTinyCadView::OnFileSaveasbitmap()
 {
 
 	// Get the file in which to save the network
-	TCHAR szFile[256];
-	szFile[0] = '\0';
-	_tcscpy_s(szFile, GetDocument()->GetPathName());
-	TCHAR* ext = _tcsrchr(szFile, '.');
-	if (!ext)
-	{
-		_tcscpy_s(szFile, _T("output.png"));
+	CString baseFileName = GetDocument()->GetPathName();
+	int suffixIdx = baseFileName.ReverseFind('.');
+	if (suffixIdx == -1) {
+		baseFileName = _T("output.png");
+		suffixIdx = baseFileName.ReverseFind('.');
 	}
-	else
-	{
-#ifdef USE_VS2003
-		_tcscpy(ext, _T(".png"));
-#else
-		size_t remaining_space = &szFile[255] - ext + 1;
-		_tcscpy_s(ext, remaining_space, _T(".png"));
-#endif
-	}
+	// replace suffix
+	baseFileName.Truncate(suffixIdx);
+	baseFileName.Insert(suffixIdx, _T(".png"));
 
 	CDlgExportPNG dlg;
-	dlg.m_Filename = szFile;
+	dlg.m_Filename = baseFileName;
 
 	if (dlg.DoModal() != IDOK) return;
 
-	CClientDC dc(this);
-	switch (dlg.m_type)
-	{
-		case 0: // Colour PNG
-			GetCurrentDocument()->SavePNG(dlg.m_Filename, dc, dlg.m_Scaling, false, dlg.m_Rotate);
+	auto ExportDoc = [&](CTinyCadDoc *pDoc, const CString &fileName) {
+		CClientDC dc(this);
+		switch (dlg.m_type)
+		{
+		case CDlgExportPNG::COLOUR_PNG:
+			pDoc->SavePNG(fileName, dc, dlg.m_Scaling, false, dlg.m_Rotate);
 			break;
-		case 1: // B&W PNG
-			GetCurrentDocument()->SavePNG(dlg.m_Filename, dc, dlg.m_Scaling, true, dlg.m_Rotate);
+		case CDlgExportPNG::BW_PNG: // Black&White
+			pDoc->SavePNG(fileName, dc, dlg.m_Scaling, true, dlg.m_Rotate);
 			break;
-		case 2: // Colour EMF
-			GetCurrentDocument()->CreateMetafile(dc, dlg.m_Filename, false);
+		case CDlgExportPNG::COLOUR_EMF:
+			pDoc->CreateMetafile(dc, fileName, false);
 			break;
-		case 3: // B&W EMF
-			GetCurrentDocument()->CreateMetafile(dc, dlg.m_Filename, true);
+		case CDlgExportPNG::BW_EMF: // Black&White
+			pDoc->CreateMetafile(dc, fileName, true);
 			break;
+		}
+	};
+
+	if (dlg.m_ExportAllSheets) {
+
+		// separator between main and the sheet name in the filename.
+		const TCHAR *separator = _T("_");
+		// Look up suffix again, dialog may have changed the base filename or its path.
+		baseFileName = dlg.m_Filename;
+		suffixIdx = baseFileName.ReverseFind('.');
+		if (suffixIdx == -1) suffixIdx = baseFileName.GetLength();
+
+		for (int i = 0; i < GetDocument()->GetNumberOfSheets(); i++) {
+			// Append sheet name on the base filename.
+			CString fileName = baseFileName;
+			// e.g. c:\work\myfolder\project.jpg -> c:\work\myfolder\project_Sheet1.jpg
+			fileName.Insert(suffixIdx, separator + GetDocument()->GetSheetName(i));
+			ExportDoc(GetDocument()->GetSheet(i), fileName);
+		}
+	} else {
+		ExportDoc(GetCurrentDocument(), dlg.m_Filename);
 	}
+
 }
 //-------------------------------------------------------------------------
 void CTinyCadView::OnOptionsColours()
@@ -1650,7 +1665,7 @@ void CTinyCadView::OnEditInsertpicture()
 		_T("JPEG (*.jpeg)|*.jpeg;*.jpg;*.jpe|")
 		_T("Windows bitmaps(*.bmp,*.dib)|*.bmp;*.dib|")
 		_T("Enhanced metafile (*.emf)|*.emf|")
-		_T("All files (*.*)|*.*||"), AfxGetMainWnd() ); 
+		_T("All files (*.*)|*.*||"), AfxGetMainWnd() );
 
 	if (dlg.DoModal() != IDOK) return;
 
@@ -1699,8 +1714,8 @@ void CTinyCadView::ChangeDir(int dir)
 	}
 
 	// Rotate object while placing it
-	else if (type == xMethod || type == xMethodEx || type == xMethodEx2 || type == xMethodEx3  
-	      || type == xLabel || type == xLabelEx || type == xLabelEx2 
+	else if (type == xMethod || type == xMethodEx || type == xMethodEx2 || type == xMethodEx3
+	      || type == xLabel || type == xLabelEx || type == xLabelEx2
 	      || type == xPower
 	      || type == xText || type == xTextEx || type == xTextEx2
 	      || type == xBusName || type == xBusNameEx
