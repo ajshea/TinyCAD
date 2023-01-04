@@ -176,7 +176,6 @@
 #define PINBOX_POWER                    384
 #define PINBOX_HIDDEN                   385
 #define TEXTBOX_TEXT                    400
-#define ID_FIND_FIND                    554
 #define IDM_EDITFLIP                    510
 #define ID_FIND_SETTAG                  512
 #define IDD_ANNOTATE                    519
@@ -207,6 +206,7 @@
 #define IDD_POLYGON                     551
 #define IDM_EDITROTATELEFT              552
 #define IDM_EDITROTATERIGHT             553
+#define ID_FIND_FIND                    554
 #define IDM_LIBCOPY                     600
 #define ID_INDICATOR_UPDATE             601
 #define IDS_NODEFAULT                   1000
@@ -375,6 +375,7 @@
 #define IDC_CHECK1                      1553
 #define IDC_ROTATE                      1554
 #define METHODBOX_SHOWPOWER             1555
+#define IDC_EXPORT_ALL_SHEETS           1555
 #define IDC_CENTRE_NAME                 1556
 #define ERC_MULTIPLENETNAMES            1564
 #define ERC_NONCASEDISTINCT             1565
@@ -393,6 +394,7 @@
 #define IDC_CLOSE_POLYGON               1586
 #define IDC_CLOSE_POLYGON2              1587
 #define IDC_SHOW_LINE                   1587
+#define DESIGNBOX_COPY                  1588
 #define LIBRARYBOX_CLEANUP              1600
 #define IDC_ZOOMCURSOR                  30988
 #define IDC_REFCURSOR                   30989
@@ -506,9 +508,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        175
+#define _APS_NEXT_RESOURCE_VALUE        177
 #define _APS_NEXT_COMMAND_VALUE         32908
-#define _APS_NEXT_CONTROL_VALUE         1587
+#define _APS_NEXT_CONTROL_VALUE         1589
 #define _APS_NEXT_SYMED_VALUE           114
 #endif
 #endif
